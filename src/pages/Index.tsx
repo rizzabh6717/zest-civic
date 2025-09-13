@@ -1,12 +1,19 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Hero } from "@/components/Hero";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="w-screen min-h-screen flex flex-col relative">
+      <Hero 
+        title="Empowering Communities Through Civic Engagement"
+        description="Report local issues, track resolutions, and participate in community governance. Together, we can build better neighborhoods."
+        badgeText="ZENTIGRITY Platform"
+        badgeLabel="Beta"
+        ctaButtons={[
+          { text: "Get Started", href: "#get-started", primary: true },
+          { text: "Learn More", href: "#about" }
+        ]}
+        microDetails={["Community‑driven", "Transparent", "Accessible"]}
+      />
     </div>
   );
 };
