@@ -3,13 +3,10 @@
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { SplitText } from 'gsap/SplitText';
-import { ShaderBackground } from './ShaderBackground';
 import { SimpleBackground } from './SimpleBackground';
-import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
 
-gsap.registerPlugin(SplitText, useGSAP);
+gsap.registerPlugin(useGSAP);
 
 interface HeroProps {
   title: string;
@@ -46,12 +43,10 @@ export function Hero({
       if (!headerRef.current) return;
 
       document.fonts.ready.then(() => {
-        const split = new SplitText(headerRef.current!, {
-          type: 'lines',
-          wordsClass: 'lines',
-        });
+        // Simple animation without SplitText to avoid licensing issues
+        const headerElement = headerRef.current!;
 
-        gsap.set(split.lines, {
+        gsap.set(headerElement, {
           filter: 'blur(16px)',
           yPercent: 30,
           autoAlpha: 0,
@@ -82,14 +77,13 @@ export function Hero({
         }
 
         tl.to(
-          split.lines,
+          headerElement,
           {
             filter: 'blur(0px)',
             yPercent: 0,
             autoAlpha: 1,
             scale: 1,
             duration: 0.9,
-            stagger: 0.15,
           },
           0.1,
         );
@@ -110,10 +104,8 @@ export function Hero({
 
   return (
     <section ref={sectionRef} className="relative h-screen w-screen overflow-hidden">
-      {/* Shader background with error boundary fallback */}
-      <ErrorBoundary fallback={<SimpleBackground />}>
-        <ShaderBackground />
-      </ErrorBoundary>
+      {/* Using simple background while debugging shader issues */}
+      <SimpleBackground />
       
       <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-6 pb-24 pt-36 sm:gap-8 sm:pt-44 md:px-10 lg:px-16">
         <div ref={badgeRef} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
