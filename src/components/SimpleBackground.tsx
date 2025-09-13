@@ -28,13 +28,15 @@ export function SimpleBackground() {
   return (
     <div 
       ref={bgRef} 
-      className="absolute inset-0 -z-10 w-full h-full bg-gradient-to-br from-civic-blue via-civic-blue to-civic-green" 
+      className="absolute inset-0 -z-10 w-full h-full bg-gradient-to-br from-generative-purple via-generative-violet to-black" 
       aria-hidden
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/30" />
-      {/* Animated circles for visual interest */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-civic-green/20 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}} />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      {/* Organic flowing shapes to mimic shader effect */}
+      <div className="absolute top-10 left-10 w-[800px] h-[600px] bg-generative-violet/30 rounded-full blur-3xl animate-pulse transform -rotate-12" />
+      <div className="absolute top-1/3 right-0 w-[600px] h-[800px] bg-generative-purple/25 rounded-full blur-3xl animate-pulse transform rotate-45" style={{animationDelay: '2s'}} />
+      <div className="absolute bottom-0 left-1/3 w-[700px] h-[500px] bg-generative-violet/20 rounded-full blur-3xl animate-pulse transform rotate-12" style={{animationDelay: '4s'}} />
+      <div className="absolute top-0 right-1/4 w-[400px] h-[600px] bg-generative-purple/15 rounded-full blur-3xl animate-pulse transform -rotate-45" style={{animationDelay: '6s'}} />
     </div>
   );
 }

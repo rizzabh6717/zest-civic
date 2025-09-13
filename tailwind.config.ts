@@ -56,6 +56,13 @@ export default {
           orange: "hsl(var(--civic-orange))",
           gray: "hsl(var(--civic-gray))",
         },
+        // Generative theme aliases
+        generative: {
+          purple: "hsl(var(--civic-blue))",
+          "purple-light": "hsl(var(--civic-blue-light))",
+          violet: "hsl(var(--civic-green))",
+          "violet-light": "hsl(var(--civic-green-light))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

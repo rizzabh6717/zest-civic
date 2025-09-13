@@ -118,9 +118,11 @@ export function Hero({
           {title}
         </h1>
 
-        <p ref={paraRef} className="max-w-2xl text-left text-base font-light leading-relaxed tracking-tight text-white/85 sm:text-lg md:text-xl">
-          {description}
-        </p>
+        <div className="max-w-2xl space-y-4">
+          <p ref={paraRef} className="text-left text-lg font-light leading-relaxed tracking-tight text-white/85 md:text-xl">
+            {description}
+          </p>
+        </div>
 
         <div ref={ctaRef} className="flex flex-wrap items-center gap-3 pt-2">
           {ctaButtons.map((button, index) => (
