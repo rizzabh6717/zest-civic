@@ -5,6 +5,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { SplitText } from 'gsap/SplitText';
 import { ShaderBackground } from './ShaderBackground';
+import { SimpleBackground } from './SimpleBackground';
+import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
 
 gsap.registerPlugin(SplitText, useGSAP);
@@ -108,8 +110,11 @@ export function Hero({
 
   return (
     <section ref={sectionRef} className="relative h-screen w-screen overflow-hidden">
-      <ShaderBackground />
-
+      {/* Shader background with error boundary fallback */}
+      <ErrorBoundary fallback={<SimpleBackground />}>
+        <ShaderBackground />
+      </ErrorBoundary>
+      
       <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-6 pb-24 pt-36 sm:gap-8 sm:pt-44 md:px-10 lg:px-16">
         <div ref={badgeRef} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
           <span className="text-[10px] font-light uppercase tracking-[0.08em] text-white/70">{badgeLabel}</span>

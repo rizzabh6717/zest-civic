@@ -156,6 +156,7 @@ const CPPNShaderMaterial = shaderMaterial(
   fragmentShader
 );
 
+// Properly extend with the material
 extend({ CPPNShaderMaterial });
 
 function ShaderPlane() {
@@ -172,7 +173,13 @@ function ShaderPlane() {
   return (
     <mesh ref={meshRef} position={[0, -0.75, -0.5]}>
       <planeGeometry args={[4, 4]} />
-      <cPPNShaderMaterial ref={materialRef} side={THREE.DoubleSide} />
+      <cPPNShaderMaterial 
+        key={CPPNShaderMaterial.key}
+        ref={materialRef} 
+        side={THREE.DoubleSide}
+        iTime={0}
+        iResolution={[1, 1]}
+      />
     </mesh>
   );
 }
@@ -219,11 +226,11 @@ export function ShaderBackground() {
   );
 }
 
-declare module '@react-three/fiber' {
-  interface ThreeElements {
-    cPPNShaderMaterial: JSX.IntrinsicElements['shaderMaterial'] & {
-      iTime?: number;
-      iResolution?: THREE.Vector2;
-    };
+// TypeScript declarations for the custom material
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      cPPNShaderMaterial: any;
+    }
   }
 }
