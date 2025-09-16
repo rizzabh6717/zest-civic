@@ -3,8 +3,10 @@
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useNavigate } from 'react-router-dom';
 import { SimpleBackground } from './SimpleBackground';
 import { Button } from './ui/button';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 gsap.registerPlugin(useGSAP);
 
@@ -28,6 +30,8 @@ export function Hero({
   ],
   microDetails = ["Community‑driven", "Transparent", "Accessible"]
 }: HeroProps) {
+  const navigate = useNavigate();
+  const { connectWallet, isConnected } = useWeb3();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headerRef = useRef<HTMLHeadingElement | null>(null);
   const paraRef = useRef<HTMLParagraphElement | null>(null);
@@ -130,11 +134,24 @@ export function Hero({
               key={index}
               variant={button.primary ? "hero" : "heroSecondary"}
               size="lg"
-              asChild
+              onClick={async () => {
+                if (button.primary) {
+                  await connectWallet();
+                  if (!isConnected) {
+                    // After successful connection, navigate to user type selector
+                    setTimeout(() => navigate('/select-role'), 100);
+                  }
+                } else {
+                  // For non-primary buttons, use regular navigation
+                  if (button.href.startsWith('#')) {
+                    document.querySelector(button.href)?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    navigate(button.href);
+                  }
+                }
+              }}
             >
-              <a href={button.href}>
-                {button.text}
-              </a>
+              {button.text}
             </Button>
           ))}
         </div>
