@@ -4,6 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGrievances, useSubmitBid } from '@/hooks/useGrievances';
+import { useWeb3 } from '@/contexts/Web3Context';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/worker/dashboard' },
