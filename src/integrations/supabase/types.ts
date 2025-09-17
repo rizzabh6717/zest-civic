@@ -14,7 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      grievances: {
+        Row: {
+          ai_classification: Json | null
+          blockchain_tx_hash: string | null
+          category: string | null
+          citizen_id: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          location: string | null
+          priority: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_classification?: Json | null
+          blockchain_tx_hash?: string | null
+          category?: string | null
+          citizen_id: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          priority?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_classification?: Json | null
+          blockchain_tx_hash?: string | null
+          category?: string | null
+          citizen_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          priority?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          reputation_score: number | null
+          updated_at: string
+          user_id: string
+          user_type: string
+          verified: boolean | null
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          reputation_score?: number | null
+          updated_at?: string
+          user_id: string
+          user_type: string
+          verified?: boolean | null
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          reputation_score?: number | null
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+          verified?: boolean | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      task_assignments: {
+        Row: {
+          assigned_at: string
+          bid_id: string
+          completed_at: string | null
+          escrow_amount: number | null
+          grievance_id: string
+          id: string
+          proof_image_url: string | null
+          verification_status: string | null
+          worker_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          bid_id: string
+          completed_at?: string | null
+          escrow_amount?: number | null
+          grievance_id: string
+          id?: string
+          proof_image_url?: string | null
+          verification_status?: string | null
+          worker_id: string
+        }
+        Update: {
+          assigned_at?: string
+          bid_id?: string
+          completed_at?: string | null
+          escrow_amount?: number | null
+          grievance_id?: string
+          id?: string
+          proof_image_url?: string | null
+          verification_status?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignments_bid_id_fkey"
+            columns: ["bid_id"]
+            isOneToOne: false
+            referencedRelation: "worker_bids"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assignments_grievance_id_fkey"
+            columns: ["grievance_id"]
+            isOneToOne: false
+            referencedRelation: "grievances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_bids: {
+        Row: {
+          bid_amount: number
+          created_at: string
+          grievance_id: string
+          id: string
+          proposal: string | null
+          status: string | null
+          worker_id: string
+        }
+        Insert: {
+          bid_amount: number
+          created_at?: string
+          grievance_id: string
+          id?: string
+          proposal?: string | null
+          status?: string | null
+          worker_id: string
+        }
+        Update: {
+          bid_amount?: number
+          created_at?: string
+          grievance_id?: string
+          id?: string
+          proposal?: string | null
+          status?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_bids_grievance_id_fkey"
+            columns: ["grievance_id"]
+            isOneToOne: false
+            referencedRelation: "grievances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
