@@ -4,15 +4,14 @@ const Index = () => {
   return (
     <div className="w-screen min-h-screen flex flex-col relative">
       <Hero 
-        title="Where algorithms become art."
-        description="A minimal hero with a neural canvas — crisp, elegant, and quietly expressive. Built with React, Three.js, and a custom CPPN shader."
-        badgeText="Generative Surfaces"
-        badgeLabel="NEW"
+        title="Empowering Communities Through Civic Engagement"
+        description="Report local issues, track resolutions, and participate in community governance. Together, we can build better neighborhoods."
+        badgeText="Zentigrity"
+        badgeLabel="BETA"
         ctaButtons={[
-          { text: "Get started", href: "#get-started", primary: true },
-          { text: "View showcase", href: "#showcase" }
+          { text: "Get Started", href: "#get-started", primary: true }
         ]}
-        microDetails={["Low‑weight font", "Tight tracking", "Subtle motion"]}
+        microDetails={["Community‑driven", "Transparent", "Blockchain‑powered"]}
       />
     </div>
   );

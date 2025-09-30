@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import axios from 'axios';
 
 export interface Grievance {
   id: string;
@@ -31,13 +31,19 @@ export const useGrievances = () => {
   return useQuery({
     queryKey: ['grievances'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('grievances')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Grievance[];
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/grievances`);
+      return response.data.data.grievances as Grievance[];
+    }
+  });
+};
+
+// Hook for marketplace grievances (available for bidding)
+export const useMarketplaceGrievances = () => {
+  return useQuery({
+    queryKey: ['marketplace-grievances'],
+    queryFn: async () => {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/grievances/marketplace`);
+      return response.data.data.grievances as Grievance[];
     }
   });
 };
@@ -52,14 +58,19 @@ export const useSubmitGrievance = () => {
       location: string;
       category?: string;
       image_url?: string;
-      citizen_id: string;
     }) => {
-      const { data, error } = await supabase.functions.invoke('submit-grievance', {
-        body: grievanceData
-      });
-      
-      if (error) throw error;
-      return data;
+      const token = localStorage.getItem('auth_token');
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/grievances`,
+        grievanceData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grievances'] });
@@ -92,20 +103,40 @@ export const useSubmitBid = () => {
   return useMutation({
     mutationFn: async (bidData: {
       grievance_id: string;
-      worker_id: string;
       bid_amount: number;
       proposal: string;
+      estimated_completion_time?: number;
     }) => {
-      const { data, error } = await supabase.functions.invoke('submit-bid', {
-        body: bidData
-      });
+      const token = localStorage.getItem('auth_token');
+      console.log('Auth token from localStorage:', token ? token.substring(0, 20) + '...' : 'No token found');
       
-      if (error) throw error;
-      return data;
+      if (!token) {
+        throw new Error('No authentication token found. Please authenticate first.');
+      }
+      
+      const requestData = {
+        ...bidData,
+        estimated_completion_time: bidData.estimated_completion_time || 24
+      };
+      
+      console.log('Bid request data:', requestData);
+      
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/bids/simple`,
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worker-bids'] });
       queryClient.invalidateQueries({ queryKey: ['grievances'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace-grievances'] });
     }
   });
 };

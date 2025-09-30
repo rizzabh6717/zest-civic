@@ -20,6 +20,7 @@ import Marketplace from "./pages/worker/Marketplace";
 
 // DAO pages
 import DAODashboard from "./pages/dao/Dashboard";
+import BidManagement from "./pages/dao/BidManagement";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +50,7 @@ const App = () => (
             {/* DAO Routes */}
             <Route path="/dao/dashboard" element={<DAODashboard />} />
             <Route path="/dao/governance" element={<DAODashboard />} />
-            <Route path="/dao/bids" element={<DAODashboard />} />
+            <Route path="/dao/bids" element={<BidManagement />} />
             <Route path="/dao/members" element={<DAODashboard />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

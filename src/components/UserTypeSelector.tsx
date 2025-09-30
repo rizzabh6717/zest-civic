@@ -1,15 +1,57 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useWeb3 } from '@/contexts/Web3Context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export function UserTypeSelector() {
   const navigate = useNavigate();
-  const { setUserType } = useWeb3();
+  const { authenticateUser, isConnected } = useWeb3();
+  const { toast } = useToast();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [selectedType, setSelectedType] = useState<'citizen' | 'worker' | 'dao' | null>(null);
 
-  const handleUserTypeSelect = (type: 'citizen' | 'worker' | 'dao') => {
-    setUserType(type);
-    navigate(`/${type}/dashboard`);
+  const handleUserTypeSelect = async (type: 'citizen' | 'worker' | 'dao') => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsAuthenticating(true);
+    setSelectedType(type);
+
+    try {
+      const success = await authenticateUser(type);
+      
+      if (success) {
+        toast({
+          title: "Authentication successful",
+          description: `Welcome to Zentigrity as a ${type}!`
+        });
+        navigate(`/${type}/dashboard`);
+      } else {
+        toast({
+          title: "Authentication failed",
+          description: "Please try again or check your wallet connection",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      toast({
+        title: "Authentication error",
+        description: "An unexpected error occurred during authentication",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAuthenticating(false);
+      setSelectedType(null);
+    }
   };
 
   return (
@@ -30,8 +72,13 @@ export function UserTypeSelector() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="hero" className="w-full">
-                Join as Citizen
+              <Button 
+                variant="hero" 
+                className="w-full"
+                onClick={() => handleUserTypeSelect('citizen')}
+                disabled={isAuthenticating}
+              >
+                {isAuthenticating && selectedType === 'citizen' ? 'Authenticating...' : 'Join as Citizen'}
               </Button>
             </CardContent>
           </Card>
@@ -45,8 +92,13 @@ export function UserTypeSelector() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="hero" className="w-full">
-                Join as Worker
+              <Button 
+                variant="hero" 
+                className="w-full"
+                onClick={() => handleUserTypeSelect('worker')}
+                disabled={isAuthenticating}
+              >
+                {isAuthenticating && selectedType === 'worker' ? 'Authenticating...' : 'Join as Worker'}
               </Button>
             </CardContent>
           </Card>
@@ -60,8 +112,13 @@ export function UserTypeSelector() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="hero" className="w-full">
-                Join as DAO Member
+              <Button 
+                variant="hero" 
+                className="w-full"
+                onClick={() => handleUserTypeSelect('dao')}
+                disabled={isAuthenticating}
+              >
+                {isAuthenticating && selectedType === 'dao' ? 'Authenticating...' : 'Join as DAO Member'}
               </Button>
             </CardContent>
           </Card>

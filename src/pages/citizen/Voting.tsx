@@ -9,7 +9,6 @@ const navigation = [
   { name: 'Submit Grievance', href: '/citizen/submit-grievance' },
   { name: 'My Grievances', href: '/citizen/grievances' },
   { name: 'Voting & Governance', href: '/citizen/voting' },
-  { name: 'Profile & Verification', href: '/citizen/profile' },
 ];
 
 export default function Voting() {
