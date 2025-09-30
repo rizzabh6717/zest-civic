@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Task Assignments</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; max-width: 800px; margin: 0 auto; }
+        button { padding: 15px 30px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .log { background: #111; padding: 15px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+        .assignment { background: #2a2a2a; padding: 10px; margin: 10px 0; border-radius: 4px; border-left: 4px solid #4CAF50; }
+        .error { color: #f44336; }
+        .success { color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>📋 Task Assignments Viewer</h1>
+    
+    <div>
+        <button onclick="getAssignments()">Get All Task Assignments</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="assignments"></div>
+    <div id="log" class="log">Click "Get All Task Assignments" to view current assignments...</div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('assignments').innerHTML = '';
+        }
+
+        async function authenticate() {
+            try {
+                const authData = {
+                    walletAddress: '0xff85a4c7082c12251c80fdf4b7f46ca04e6c43d9',
+                    signature: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12',
+                    message: 'Sign this message to authenticate with Zentigrity.\\n\\nWallet: 0xff85a4c7082c12251c80fdf4b7f46ca04e6c43d9\\nUser Type: dao\\nTimestamp: ' + new Date().toISOString(),
+                    timestamp: new Date().toISOString(),
+                    userType: 'dao'
+                };
+
+                const response = await fetch(`${API_BASE}/users/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(authData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.data.token;
+                } else {
+                    log('Authentication failed', 'error');
+                    return null;
+                }
+            } catch (error) {
+                log(`Auth error: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function getAssignments() {
+            try {
+                log('🔐 Authenticating...');
+                const token = await authenticate();
+                if (!token) return;
+                
+                log('✅ Authenticated, fetching assignments...');
+                
+                // Try different endpoints to find assignments
+                const endpoints = [
+                    '/task-assignments',
+                    '/assignments', 
+                    '/dao/assignments',
+                    '/worker/assignments'
+                ];
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        log(`📤 Trying: ${API_BASE}${endpoint}`);
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            log(`✅ Found assignments at: ${endpoint}`, 'success');
+                            displayAssignments(data);
+                            return;
+                        } else {
+                            log(`❌ ${endpoint}: ${response.status} ${response.statusText}`);
+                        }
+                    } catch (err) {
+                        log(`❌ ${endpoint}: ${err.message}`, 'error');
+                    }
+                }
+                
+                log('❌ No assignment endpoints found', 'error');
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayAssignments(data) {
+            const container = document.getElementById('assignments');
+            const assignments = data.data || data.assignments || data;
+            
+            if (!assignments || assignments.length === 0) {
+                container.innerHTML = '<div class="assignment">No assignments found</div>';
+                return;
+            }
+            
+            container.innerHTML = '<h2>📋 Current Task Assignments:</h2>';
+            
+            assignments.forEach(assignment => {
+                const div = document.createElement('div');
+                div.className = 'assignment';
+                div.innerHTML = `
+                    <h3>Assignment ID: ${assignment._id || assignment.id}</h3>
+                    <p><strong>Grievance ID:</strong> ${assignment.grievance_id}</p>
+                    <p><strong>Worker ID:</strong> ${assignment.worker_id}</p>
+                    <p><strong>Bid ID:</strong> ${assignment.bid_id}</p>
+                    <p><strong>Status:</strong> ${assignment.status}</p>
+                    <p><strong>Escrow Amount:</strong> ${assignment.escrow_amount}</p>
+                    <p><strong>Created:</strong> ${assignment.createdAt || assignment.created_at}</p>
+                    <button onclick="testUnassign('${assignment._id || assignment.id}', '${assignment.grievance_id}')">
+                        🔄 Test Unassign This Task
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function testUnassign(assignmentId, grievanceId) {
+            try {
+                log(`🔄 Testing unassign for assignment: ${assignmentId}`);
+                
+                const token = await authenticate();
+                if (!token) return;
+                
+                const response = await fetch(`${API_BASE}/dao/unassign-task`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        assignment_id: assignmentId,
+                        reason: 'Test unassignment from debug tool'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Unassignment successful: ${JSON.stringify(data, null, 2)}`, 'success');
+                    
+                    // Refresh assignments
+                    setTimeout(() => getAssignments(), 1000);
+                } else {
+                    const error = await response.text();
+                    log(`❌ Unassignment failed: ${error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Unassign error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

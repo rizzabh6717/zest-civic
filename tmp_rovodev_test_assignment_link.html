@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Assignment Linking</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; max-width: 800px; margin: 0 auto; }
+        button { padding: 15px 30px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .log { background: #111; padding: 15px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+        .bid { background: #2a2a2a; padding: 10px; margin: 10px 0; border-radius: 4px; border-left: 4px solid #4CAF50; }
+        .accepted { border-left-color: #4CAF50; }
+        .pending { border-left-color: #FFC107; }
+        .error { color: #f44336; }
+        .success { color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Test Assignment Linking</h1>
+    
+    <div>
+        <h2>Instructions:</h2>
+        <ol>
+            <li><strong>First:</strong> Login to the main app at <a href="http://localhost:8082/" target="_blank">localhost:8082</a></li>
+            <li><strong>Then:</strong> Come back here and click "Test Assignment Links"</li>
+        </ol>
+        
+        <button onclick="testAssignmentLinks()">🔗 Test Assignment Links</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="bids"></div>
+    <div id="log" class="log">Follow the instructions above, then click "Test Assignment Links"...</div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('bids').innerHTML = '';
+        }
+
+        async function testAssignmentLinks() {
+            try {
+                log('🔐 Testing assignment links...');
+                
+                // Test the bids endpoint that should include assignment info
+                log('📤 Fetching bids with assignment info...');
+                const response = await fetch(`${API_BASE}/bids`, {
+                    credentials: 'include' // Use session from main app
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log('✅ Bids fetched successfully');
+                log(`📊 Found ${data.data.bids.length} bids`);
+                
+                const bidsContainer = document.getElementById('bids');
+                bidsContainer.innerHTML = '<h2>📋 Bids with Assignment Info:</h2>';
+                
+                data.data.bids.forEach(bid => {
+                    const hasAssignment = bid.assignment ? true : false;
+                    const statusClass = bid.status === 'accepted' ? 'accepted' : 'pending';
+                    
+                    const bidDiv = document.createElement('div');
+                    bidDiv.className = `bid ${statusClass}`;
+                    bidDiv.innerHTML = `
+                        <h3>Bid ID: ${bid._id}</h3>
+                        <p><strong>Status:</strong> ${bid.status}</p>
+                        <p><strong>Amount:</strong> $${bid.bid_amount}</p>
+                        <p><strong>Grievance:</strong> ${bid.grievance?.title || 'Unknown'}</p>
+                        <p><strong>Worker:</strong> ${bid.worker?.display_name || 'Unknown'}</p>
+                        <p><strong>Has Assignment:</strong> ${hasAssignment ? '✅ YES' : '❌ NO'}</p>
+                        ${hasAssignment ? `
+                            <div style="background: #333; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                                <strong>Assignment Info:</strong><br>
+                                Assignment ID: ${bid.assignment._id}<br>
+                                Assignment Status: ${bid.assignment.status}<br>
+                                Escrow Amount: $${bid.assignment.escrow_amount}
+                                <br><br>
+                                <button onclick="testUnassign('${bid.assignment._id}', '${bid.grievance?.title || 'Unknown'}')">
+                                    🔄 Test Unassign
+                                </button>
+                            </div>
+                        ` : ''}
+                    `;
+                    bidsContainer.appendChild(bidDiv);
+                });
+                
+                // Summary
+                const acceptedWithAssignments = data.data.bids.filter(b => b.status === 'accepted' && b.assignment).length;
+                const acceptedWithoutAssignments = data.data.bids.filter(b => b.status === 'accepted' && !b.assignment).length;
+                
+                log(`📊 Summary:`, 'success');
+                log(`  - Accepted bids WITH assignments: ${acceptedWithAssignments}`, acceptedWithAssignments > 0 ? 'success' : 'info');
+                log(`  - Accepted bids WITHOUT assignments: ${acceptedWithoutAssignments}`, acceptedWithoutAssignments > 0 ? 'error' : 'info');
+                
+                if (acceptedWithAssignments > 0) {
+                    log('🎉 Assignment linking is working! You can now unassign tasks.', 'success');
+                } else if (acceptedWithoutAssignments > 0) {
+                    log('⚠️ Found accepted bids but no assignments linked. You may need to assign some tasks first.', 'error');
+                } else {
+                    log('ℹ️ No accepted bids found. Try assigning some tasks first.', 'info');
+                }
+                
+            } catch (error) {
+                log(`💥 Error: ${error.message}`, 'error');
+                
+                if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                    log('🔑 Please login to the main app first at localhost:8082', 'error');
+                } else {
+                    log('📄 Full error details: ' + JSON.stringify(error, null, 2), 'error');
+                }
+            }
+        }
+
+        async function testUnassign(assignmentId, grievanceTitle) {
+            try {
+                log(`🔄 Testing unassign for: ${assignmentId}`);
+                
+                const response = await fetch(`${API_BASE}/dao/unassign-task`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        assignment_id: assignmentId,
+                        reason: 'Test unassign from assignment link test'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    log(`🎉 ✅ UNASSIGN SUCCESSFUL for: ${grievanceTitle}`, 'success');
+                    log(`📊 Transaction ID: ${result.data.transaction.transaction_id}`, 'success');
+                    
+                    // Refresh the view
+                    setTimeout(() => testAssignmentLinks(), 1000);
+                } else {
+                    log(`❌ Unassign failed: ${result.message || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Unassign error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

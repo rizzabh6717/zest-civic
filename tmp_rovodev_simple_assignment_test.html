@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Assignment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; max-width: 600px; margin: 0 auto; }
+        button { padding: 15px 30px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .log { background: #111; padding: 15px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 14px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Simple Assignment Transaction Test</h1>
+    
+    <div>
+        <h2>📋 Test Assignment Flow</h2>
+        <p>This will test the complete assignment process with dummy data</p>
+        <button onclick="testAssignment()">🚀 Test Assignment Transaction</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div>
+        <h3>📊 Test Log:</h3>
+        <div id="log" class="log">Click "Test Assignment Transaction" to start...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testAssignment() {
+            clearLog();
+            log('🚀 ===== STARTING ASSIGNMENT TEST =====');
+            
+            try {
+                // Step 1: Mock DAO API call
+                log('📊 Step 1: Testing DAO Assignment API call...');
+                
+                const testBidData = {
+                    bid_id: '507f1f77bcf86cd799439011', // Dummy MongoDB ObjectId
+                    reason: 'Test assignment for transaction testing'
+                };
+                
+                log(`📤 Calling: POST ${API_BASE}/dao/assign-bid`);
+                log(`📋 Data: ${JSON.stringify(testBidData, null, 2)}`);
+                
+                // We'll skip the actual API call for now and test the blockchain part
+                log('⏭️ Skipping API call, testing blockchain transaction directly...');
+                
+                // Step 2: Test blockchain transaction
+                log('\n⛓️ Step 2: Testing Blockchain Transaction...');
+                
+                // Check if MetaMask is available
+                if (typeof window.ethereum === 'undefined') {
+                    log('❌ MetaMask not found!', 'error');
+                    return;
+                }
+                
+                log('✅ MetaMask detected');
+                
+                // Check current account
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length === 0) {
+                    log('🔗 No accounts connected, requesting connection...');
+                    const newAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    log(`✅ Connected to: ${newAccounts[0]}`);
+                } else {
+                    log(`✅ Current account: ${accounts[0]}`);
+                }
+                
+                // Check network
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                log(`🌐 Current chain: ${chainId} (${parseInt(chainId, 16)})`);
+                log(`🌐 Expected: 0xa869 (43113 - Avalanche Fuji)`);
+                
+                // Test parameters
+                const testParams = {
+                    grievanceId: 123,
+                    bidId: 456,
+                    amount: '0.01' // 0.01 AVAX for testing
+                };
+                
+                log('\n🧪 Testing contract interaction...');
+                log(`📋 Test Parameters: ${JSON.stringify(testParams, null, 2)}`);
+                
+                // Try to call a simple contract read function first
+                log('🔍 Testing contract availability...');
+                
+                // If you have the contract instance available, uncomment and modify:
+                /*
+                if (window.contract) {
+                    log('✅ Contract instance found');
+                    
+                    // Test a simple read function
+                    try {
+                        const hasRole = await window.contract.hasRole(
+                            '0x3b5d4cc60d3ec3516ee8ae083bd60934f6eb2a6c54b1229985c41bfb092b2603',
+                            accounts[0]
+                        );
+                        log(`🔍 DAO Role check: ${hasRole}`, hasRole ? 'success' : 'error');
+                    } catch (roleError) {
+                        log(`❌ Role check failed: ${roleError.message}`, 'error');
+                    }
+                    
+                    // Test the actual assignment function
+                    try {
+                        log('📤 Calling assignTask...');
+                        const tx = await window.contract.assignTask(
+                            testParams.grievanceId,
+                            testParams.bidId,
+                            { value: window.ethers.utils.parseEther(testParams.amount) }
+                        );
+                        log(`✅ Transaction submitted: ${tx.hash}`, 'success');
+                        
+                        log('⏳ Waiting for confirmation...');
+                        const receipt = await tx.wait();
+                        log(`🎉 Transaction confirmed in block: ${receipt.blockNumber}`, 'success');
+                        
+                    } catch (txError) {
+                        log(`❌ Transaction failed: ${txError.message}`, 'error');
+                        log(`📄 Error details: ${JSON.stringify(txError, null, 2)}`, 'error');
+                    }
+                } else {
+                    log('❌ Contract instance not found', 'error');
+                    log('💡 Make sure the contract is properly initialized', 'info');
+                }
+                */
+                
+                // Manual transaction test
+                log('\n🔧 Manual transaction test...');
+                log('📤 Sending test transaction to contract...');
+                
+                try {
+                    const txParams = {
+                        to: '0x26600f2341f30bb9829bc2fcaa48ae8c0d74736e', // Your contract address
+                        value: '0x' + (0.01 * Math.pow(10, 18)).toString(16), // 0.01 AVAX in wei
+                        data: '0x', // Empty data for test
+                        from: accounts[0]
+                    };
+                    
+                    log(`📋 Transaction params: ${JSON.stringify(txParams, null, 2)}`);
+                    
+                    const txHash = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [txParams]
+                    });
+                    
+                    log(`✅ Test transaction sent: ${txHash}`, 'success');
+                    log('🎉 MetaMask transaction working!', 'success');
+                    
+                } catch (manualTxError) {
+                    log(`❌ Manual transaction failed: ${manualTxError.message}`, 'error');
+                    
+                    if (manualTxError.code === 4001) {
+                        log('👤 User rejected the transaction', 'info');
+                    } else if (manualTxError.message.includes('insufficient funds')) {
+                        log('💰 Insufficient funds for gas', 'error');
+                    } else {
+                        log(`📄 Full error: ${JSON.stringify(manualTxError, null, 2)}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log(`💥 Test failed: ${error.message}`, 'error');
+                log(`📄 Full error: ${JSON.stringify(error, null, 2)}`, 'error');
+            }
+            
+            log('\n✅ ===== TEST COMPLETED =====');
+        }
+    </script>
+</body>
+</html>

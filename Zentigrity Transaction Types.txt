@@ -1,0 +1,92 @@
+Zentigrity Transaction Types
+1. GrievanceRegistry (Submit Grievance)
+
+Trigger: Citizen submits grievance (wallet auth).
+
+On-chain: Stores grievance ID + timestamp.
+
+Off-chain (MongoDB): Stores full grievance details (description, media, AI tags).
+
+Output: grievanceId created.
+
+✅ Example:
+Alice reports “Pothole near school” → IPFS hash stored → grievanceId = #101.
+
+2. submitBid (Worker Bid Submission)
+
+Trigger: Worker submits bid for an open grievance.
+
+On-chain: Worker address + bid amount + grievanceId.
+
+Off-chain: Stores details in MongoDB (time_to_resolve, experience, comments).
+
+Output: Bid list tied to grievance.
+
+✅ Example:
+Worker Bob bids 120 AVAX / 6 hours for grievance #101.
+
+3. TaskAssignment (DAO Assigns Task)
+
+Trigger: DAO or auto-assignment picks best bid.
+
+On-chain: Records grievanceId → assignedWorker.
+
+Dashboard: DAO UI shows assigned worker for each grievance.
+
+Output: Worker locked for task.
+
+✅ Example:
+DAO assigns grievance #101 to Bob. DAO dashboard shows “Task #101 → Assigned to Bob (Wallet 0x1234)”.
+
+4. workComplete (Task Resolution Proof)
+
+Trigger: Assigned worker submits completion proof (photo/video on IPFS).
+
+On-chain: Updates status grievanceId → completed.
+
+Off-chain: MongoDB stores IPFS link + timestamp.
+
+Output: Ready for escrow release.
+
+✅ Example:
+Bob uploads photo of fixed pothole → status = Completed.
+
+5. EscrowManager (Funds Release)
+
+Trigger: Citizen + DAO confirm resolution.
+
+On-chain: Escrow releases AVAX to worker (minus fee).
+
+Off-chain: MongoDB updates grievance status = Resolved.
+
+Output: Worker gets paid, grievance closed.
+
+✅ Example:
+120 AVAX locked → 117 AVAX paid to Bob, 3 AVAX platform fee.
+
+🎯 Final Flow
+
+Citizen → GrievanceRegistry (submit grievance)
+
+Workers → submitBid (bids stored on-chain + MongoDB)
+
+DAO → TaskAssignment (assign best bid)
+
+Worker → workComplete (upload proof)
+
+EscrowManager (release funds)
+
+🖥️ DAO Dashboard (Minimal Requirements)
+ create  a page 
+List of all grievances (grievanceId, description, status).
+
+For each grievance:
+
+Assigned worker + wallet address.
+
+Current status (Open, Assigned, Completed, Resolved).
+
+Voting/proposals (if DAO voting enabled).
+
+Ability for DAO/citizens to confirm completion → triggers EscrowManager.
+i also want the rupee conversion of avax like the bid should be submitted in rupee and the avax equivalent of that rupee should be used in transaction

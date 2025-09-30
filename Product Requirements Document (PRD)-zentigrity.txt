@@ -1,0 +1,82 @@
+Product Requirements Document (PRD) – Zentigrity
+
+A Decentralized AI-Powered Grievance Redressal Platform
+1. Introduction
+Zentigrity is a decentralized grievance redressal platform that leverages blockchain, AI agents, and DAO governance to ensure fair, transparent, and efficient resolution of citizen grievances.
+
+The system integrates:
+React frontend for user interaction
+FastAPI backend for business logic + AI pipelines
+MongoDB for dynamic data storage
+Avalanche blockchain for immutable grievance registry, escrow, and DAO voting
+2. Goals & Objectives
+Provide citizens with a trustless grievance reporting system.
+Enable workers (service providers) to bid and resolve grievances transparently.
+Use AI agents to tag, classify, and prioritize grievances.
+Govern resolution and rewards via DAO voting.
+Ensure transaction transparency on blockchain.
+3. Updated Workflow
+Step 1: Citizen Grievance Submission
+User logs in via MetaMask wallet.
+Submits grievance → description, category, media 
+Transaction Trigger:
+A blockchain transaction is created when grievance is submitted.
+Grievance data stored in MongoDB (off-chain).
+Minimal hash reference stored on Avalanche blockchain.
+Step 2: Data Storage & AI Tagging
+Grievance stored in grievances collection in MongoDB:
+
+{
+  "_id": "ObjectId",
+  "citizen_id": "wallet_address",
+  "description": "Pothole near school",
+  "image_url": "ipfs://abc123",
+  "status": "open",
+  "ai_tags": [],
+  "created_at": "timestamp"
+}
+
+
+AI Agent (FastAPI + NLP/CLIP) fetches new grievances from MongoDB.
+Adds tags → "road", "urgent", "safety hazard".
+Updates MongoDB with classification.
+when citizen see his dashboard it will show the tag.
+Step 3: Marketplace Bidding
+Marketplace fetches grievances from blockchain hash registry and the ai agent tag is fetched from mongodb linked to same grievance ID. so the worker can see the the tag .
+Workers browse open grievances.
+Workers submit bids (price, time-to-resolve).
+Bids stored in bids collection (MongoDB) + linked to grievance ID.
+Step 4: Assignment & DAO Voting
+If multiple bids exist → DAO decides winner.
+DAO members(just one person for now ) vote via governance contract.
+there is only one vote -so the work is assigned to the worker after vote count which is basically the vote of dao member (yes/no)
+system  tallies votes automatically.
+Selected worker assigned to grievance.
+Step 5: Resolution & Escrow Release
+Worker resolves grievance → uploads proof (photo, video, document).
+Citizen or DAO verifies resolution.
+Escrow smart contract releases payment to worker.
+Grievance status updated in MongoDB → "resolved".
+i will use two wallet address - one for (citizen and worker) and 2nd for dao. the escrow will get the fund from dao's wallet.
+4. User Roles
+Citizen → Submits grievances, verifies resolution.
+Worker → Bids on grievances, resolves them.
+DAO Member → Votes on disputes, assigns workers when multiple bids.
+Admin (initial) → Sets up contracts, manages categories (later minimized).
+
+5. Tech Stack
+Frontend: React + TailwindCSS + Wallet integration (MetaMask).
+Backend: FastAPI (Python) with REST APIs.
+Database: MongoDB (Atlas).
+Blockchain: Avalanche (Testnet → Mainnet).
+AI Agent: NLP for text classification, CLIP for multimodal tagging.
+Storage: IPFS for grievance media files.
+
+6. MVP Features 
+Landing page + wallet login.
+Grievance submission (stored in MongoDB + hash on blockchain).
+AI auto-tagging for classification.
+Marketplace UI → workers view grievances & place bids.
+Basic DAO voting for assignment.
+Escrow release flow ( real Avalanche ).
+
